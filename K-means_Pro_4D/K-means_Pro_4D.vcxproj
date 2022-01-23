@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{9d969c4a-cac3-4c9d-aa1c-d3637dfc29fe}</ProjectGuid>
-    <RootNamespace>KmeansPRO</RootNamespace>
+    <ProjectGuid>{d9c60659-a774-48b7-a6c5-f170fea6ae50}</ProjectGuid>
+    <RootNamespace>KmeansPro4D</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="K-means_PRO.cpp" />
+    <ClCompile Include="K-means_Pro_4D.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

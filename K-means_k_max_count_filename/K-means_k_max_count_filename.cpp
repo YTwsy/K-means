@@ -11,6 +11,9 @@
 #include <functional>
 #include<iomanip>
 #include<sstream>
+#include< cstdlib> 
+#include<math.h>
+
 
 //D:/GIS/GIS二次开发/
 
@@ -35,7 +38,6 @@ class KMeans
 public:
     int K;
     vector<point>points;
-    //800 个 点
     int point_count;
     //KMeans() :points(10000) {};
     vector<vector<point>>every_k_class_with_point;
@@ -64,7 +66,7 @@ public:
 
     bool change_center();
 
-    void txt_to_vector_point();
+    void txt_to_vector_point(string filename);
 
     bool kmeans();
 
@@ -72,20 +74,40 @@ public:
 
     void output();
 
-    void write_to_txt(string s);
+    void write_to_txt(string filename);
 };
 
 double KMeans::get_dintance(point a, point b)
 {
-    return sqrt((a.x - b.x) * (a.x - b.x) + (b.y - a.y) * (b.y - a.y));
+    return sqrt((a.x - b.x) * (a.x - b.x) + (b.y - a.y) * (b.y - a.y)) ;
 }
 
-//void KMeans::txt_to_vector_point(vector<point>& points)   //读文件
+#pragma warning(disable:4996)
+vector<string> split(const string& str, const string& delim)
+{
+    vector<string> res;
+    if ("" == str) return res;
+    //先将要切割的字符串从string类型转换为char*类型  
+    char* strs = new char[str.length() + 1]; //不要忘了  
+    strcpy(strs, str.c_str());
 
-void KMeans::txt_to_vector_point()   //读文件
+    char* d = new char[delim.length() + 1];
+    strcpy(d, delim.c_str());
+
+    char* p = strtok(strs, d);
+    while (p) {
+        string s = p; //分割得到的字符串转换为string类型  
+        res.push_back(s); //存入结果数组  
+        p = strtok(NULL, d);
+    }
+
+    return res;
+}
+
+void KMeans::txt_to_vector_point(string filename)   //读文件
 {
     ifstream ifs;
-    ifs.open("Pre_cluster_points.txt", ios::in);
+    ifs.open(filename, ios::in);
     if (!ifs.is_open())
     {
         cout << "Pre_cluster_points.txt文件打开失败" << endl;
@@ -96,39 +118,23 @@ void KMeans::txt_to_vector_point()   //读文件
 
     string buf;
     int w = 0;
-    while (getline(ifs, buf) && w < point_count)  //把数据读到buf中
+    while (getline(ifs, buf), w < point_count)  //把数据读到buf中
     {
-        int lines_length = buf.length();
-        for (int i = 0; i < lines_length; i++)
-        {
-            if (buf[i] == ',')
-            {
-                string buf_push;
-                for (int j = 0; j < i; j++)//j为第几位开始读
-                {
-                    cout << buf[j];
-                    buf_push.push_back(buf[j]);
-                }
-                points[w].x = atof(buf_push.c_str());
+        vector<string> AllStr = split(buf, ",");
 
-                cout << endl;
+        points[w].x = atof(AllStr[0].c_str());
+        cout << points[w].x << endl;
 
-                string buf_push_1;
-                for (int o = i + 2; o < lines_length; o++)//lines_length为读到第几位
-                {
-                    cout << buf[o];
-                    buf_push_1.push_back(buf[o]);
-                }
-                points[w].y = atof(buf_push_1.c_str());
+        points[w].y = atof(AllStr[1].c_str());
+        cout << points[w].y << endl;
 
-                cout << endl;
-                break;
-            }
-        }
         points[w].id = w;
         w++;
     }
     ifs.close(); //最后关闭文件
+    //point_counts = w;
+    //cout << point_counts << endl;
+    //point_count = point_counts;
 
 }
 
@@ -139,6 +145,7 @@ void KMeans::first_k()
         int first_center_id = rand() % point_count;
         k_center[i].x = points[first_center_id].x;
         k_center[i].y = points[first_center_id].y;
+
         every_k_class_with_point[i].push_back(points[first_center_id]);
     }
 }
@@ -158,6 +165,7 @@ void KMeans::first_k_pro()
     int first_center_id = rand() % point_count;
     k_center[0].x = points[first_center_id].x;
     k_center[0].y = points[first_center_id].y;
+
     //every_k_class_with_point[0].push_back(points[first_center_id]);
     for (int j = 0; j < K; j++)
     {
@@ -180,6 +188,7 @@ void KMeans::first_k_pro()
 
             k_center[j].x = points[dis[0].id].x;  //out of range?
             k_center[j].y = points[dis[0].id].y;
+
         }
         every_k_class_with_point[j].push_back(points[first_center_id]);
     }
@@ -194,22 +203,26 @@ bool KMeans::change_center()
         double new_center_x = 0;
         double new_center_y = 0;
 
+
         for (int i = 0; i < every_k_class_with_point[k_class_i].size(); i++)
         {
             new_center_x += every_k_class_with_point[k_class_i][i].x;
             new_center_y += every_k_class_with_point[k_class_i][i].y;
+
         }
         new_center_x = new_center_x / every_k_class_with_point[k_class_i].size();
         new_center_y = new_center_y / every_k_class_with_point[k_class_i].size();
 
-        double center = sqrt((new_center_x - k_center[k_class_i].x) *
+
+        double center = (new_center_x - k_center[k_class_i].x) *
             (new_center_x - k_center[k_class_i].x) + (new_center_y - k_center[k_class_i].y) *
-            (new_center_y - k_center[k_class_i].y));        //接口准备
+            (new_center_y - k_center[k_class_i].y);    //接口准备
 
         center_from_pre[k_class_i] = center;
 
         k_center[k_class_i].x = new_center_x;
         k_center[k_class_i].y = new_center_y;
+
     }
 
     for (int i = 0; i < K; i++)
@@ -276,16 +289,15 @@ void KMeans::output()
 {
     for (int i = 0; i < points.size(); i++)
     {
-        cout << points[i].id << "         " << setprecision(16) << points[i].x << "        "
-            << setprecision(17) << points[i].y << "       " << points[i].class_point << endl;
+        cout << points[i].id << points[i].class_point << endl;
     }
 }
 
-void KMeans::write_to_txt(string index)
+void KMeans::write_to_txt(string filename)
 {
     ofstream ofs;
 
-    string K_to_name = "k - means_point_"+index+".txt";
+    string K_to_name = filename+"k-means_point.txt";
     //stringstream ss;
     //string str;
     //ss << K;
@@ -296,8 +308,7 @@ void KMeans::write_to_txt(string index)
 
     for (int i = 0; i < point_count; i++)
     {
-        ofs << points[i].id << "," << setprecision(16) << points[i].x << ","
-            << setprecision(17) << points[i].y << "," << points[i].class_point << endl;
+        ofs << points[i].id << "," << points[i].class_point << endl;
     }
     ofs.close();
 }
@@ -306,131 +317,22 @@ void KMeans::write_to_txt(string index)
 int main(int argc, char** argv)
 {
     cout << argv[1] << endl;
-    string index_process= argv[1];
-    cout << index_process << endl;
-
-
-    //KMeans kmeans5;
-    //kmeans5.set_k(5);
-    //kmeans5.txt_to_vector_point();//可能bug
-    //kmeans5.first_k();
-    int max_k_means;
-    //cout << "输入最大迭代次数" << endl;
-    //cin >> max_k_means;
-
-    //for (int i = 0; i < max_k_means; i++)
-    //{
-    //    cout << "迭代次数" << i + 1 << ":" << endl;
-
-    //    if (kmeans5.kmeans() == 0)
-    //    {
-    //        cout << "没有类别再发生变化" << endl;
-    //        break;
-    //    }
-    //    if (kmeans5.change_center() == 0)
-    //    {
-    //        cout << "没有聚类中心再发生变化" << endl;
-    //        break;
-    //    };
-    //}
-    //kmeans5.output();
-    //kmeans5.write_to_txt();
-
-    //KMeans kmeans7;
-    //kmeans7.set_k(7);
-    //kmeans7.txt_to_vector_point();//可能bug
-    //kmeans7.first_k();
-    //cout << "输入最大迭代次数" << endl;
-    //cin >> max_k_means;
-
-    //for (int i = 0; i < max_k_means; i++)
-    //{
-    //    cout << "迭代次数" << i + 1 << ":" << endl;
-
-    //    if (kmeans7.kmeans() == 0)
-    //    {
-    //        cout << "没有类别再发生变化" << endl;
-    //        break;
-    //    }
-    //    if (kmeans7.change_center() == 0)
-    //    {
-    //        cout << "没有聚类中心再发生变化" << endl;
-    //        break;
-    //    };
-    //}
-    //kmeans7.output();
-    //kmeans7.write_to_txt();
-
-    //KMeans kmeans9;
-    //kmeans9.set_k(9);
-    //kmeans9.txt_to_vector_point();//可能bug
-    //kmeans9.first_k();
-    //cout << "输入最大迭代次数" << endl;
-    //cin >> max_k_means;
-
-    //for (int i = 0; i < max_k_means; i++)
-    //{
-    //    cout << "迭代次数" << i + 1 << ":" << endl;
-
-    //    if (kmeans9.kmeans() == 0)
-    //    {
-    //        cout << "没有类别再发生变化" << endl;
-    //        break;
-    //    }
-    //    if (kmeans9.change_center() == 0)
-    //    {
-    //        cout << "没有聚类中心再发生变化" << endl;
-    //        break;
-    //    };
-    //}
-    //kmeans9.output();
-    //kmeans9.write_to_txt();
-
-
-    ifstream ifs;
-    ifs.open("k-means_K&max_cluster_"+index_process+".txt", ios::in);
-    if (!ifs.is_open())
-    {
-        cout << "k - means_K & max_cluster.txt文件打开失败" << endl;
-        return 0;        //若是main函数中，需return 0；
-    }                              //判断是否打开成功
-
-     //point points[w];
-
-    string buf;
-    getline(ifs, buf);
-    int K = 0;
-    stringstream stream(buf);
-    stream >> K;
+    int K = atoi(argv[1]);
     cout << K << endl;
-    getline(ifs, buf);
-    stringstream streams(buf);
-    streams >> max_k_means;
+
+    int max_k_means = atoi(argv[2]);
+
+    int txt_point_count = atoi(argv[3]);
+
+    string filename= argv[4];
+
     cout << max_k_means << endl;
 
-
-    ifs.close(); //最后关闭文件
-
-    ifstream ifss;
-    ifss.open("points_counts.txt", ios::in);
-    if (!ifss.is_open())
-    {
-        cout << "points_counts.txt文件打开失败" << endl;
-        return 0;        //若是main函数中，需return 0；
-    }                              //判断是否打开成功
-    getline(ifss, buf);
-    int point_counts;
-    stringstream streamss(buf);
-    streamss >> point_counts;
-    cout << point_counts << endl;
-
-
-
     KMeans kmeans9_pro;
-    kmeans9_pro.set_point_count(point_counts);
+    kmeans9_pro.set_point_count(txt_point_count);
     kmeans9_pro.set_k(K);
-    kmeans9_pro.txt_to_vector_point();//可能bug
-    kmeans9_pro.first_k_pro();
+    kmeans9_pro.txt_to_vector_point(filename);//可能bug
+    kmeans9_pro.first_k();
     //cout << "输入最大迭代次数" << endl;
     //cin >> max_k_means;
 
@@ -450,6 +352,6 @@ int main(int argc, char** argv)
         };
     }
     kmeans9_pro.output();
-    kmeans9_pro.write_to_txt(index_process);
+    kmeans9_pro.write_to_txt(filename);
 
 }

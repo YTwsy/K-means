@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{9d969c4a-cac3-4c9d-aa1c-d3637dfc29fe}</ProjectGuid>
-    <RootNamespace>KmeansPRO</RootNamespace>
+    <ProjectGuid>{0b603128-f8e6-4456-9bba-d247f3f069ac}</ProjectGuid>
+    <RootNamespace>Kmeanskmaxcountfilename</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -139,7 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="K-means_PRO.cpp" />
+    <ClCompile Include="K-means_k_max_count_filename.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
